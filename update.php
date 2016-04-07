@@ -1,62 +1,43 @@
 <?php
 require "utils.php";
 
-$default_options = array(
-	"temp_location" => "/home/user/public_html/temp/",
-	"dest_location" => "/home/user/public_html/",
-	"working_dir" => "/home/user/public_html/latest/",
-	"secret" => "",
-	"buildscript" => "/home/user/public_html/build/buildscript.php",
-	"parsedown_location" => "/home/user/public_html/parsedown/Parsedown.php",
-	"exclude" => array()
-);
-
-if(!file_exists("../options.json")){
-	throw new Exception("options.json: file not found at " . realpath("../options.json"), 1);
-	die();
-}
-
-$optionsRaw = file_get_contents("../options.json");
-$options = $default_options;
-try {
-	$options = array_merge($options, json_decode($optionsRaw, true));
-} catch (Exception $e) {
-	print($e);
-}
+// Set working directories and file destinations
 $tempLocation = $options['temp_location'];
-$archiveLocation = $tempLocation . "release.tar.gz";
+$archiveLocation = $tempLocation . "src_release.tar.gz";
 $releaseFileLocation = $options['working_dir'];
 
-$secretHash = "sha1=" . sha1($options['secret']);
+// Create sha1 hash to validate payload
+$rawPayload = file_get_contents("php://input");
+$secretHash = "sha1=" . hash_hmac("sha1", $rawPayload, $options['secret']);
 
+// Validate payload and source of request
 if(!isset($_SERVER['HTTP_X_HUB_SIGNATURE']) || $_SERVER['HTTP_X_HUB_SIGNATURE'] != $secretHash){
-	throw new Exception("Not a valid signature!", 1);
+	throw new Exception("Not a valid signature!: ", 1);
 	die();
 }
 
+// Check event: only release events are accepted
+if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || $_SERVER['HTTP_X_GITHUB_EVENT'] != "release"){
+	throw new Exception("This is not a release event!", 1);
+	die();
+}
+
+// Check decoded payload data
 if(!isset($_POST['payload'])){
-	throw new Exception("No payload available!", 1);
+	throw new Exception("No url encoded payload available!", 1);
 	die();
 }
 
-$payload = array();
-
-try{
-	$payload = json_decode($_POST['payload'], true);
-} catch(Exception $e){
-	die("Error decoding payload");
-}
-
-if(!isset($payload['release']) || !isset($payload['repository'])){
-	throw new Exception("Payload does not contain the right information", 1);
-	die();
-}
+// Assuming the Github Webhook documentation is correct: we don't need to check if data exists.
+// Decode payload JSON data
+$payload = json_decode($_POST['payload'], true);
 
 $repo = $payload['repository'];
 $release_match = "/" . str_replace("/", "-", $repo['full_name']) . ".*/"; // match name-repo-version regex
 $release = $payload['release'];
 $tarball_url = $release['tarball_url'];
 
+// Download release tarball
 try {
 	$dest_file = fopen($archiveLocation, 'wb');
 	$options = array(
@@ -80,6 +61,7 @@ try {
 	die("Error downloading file: " . print_r($e, true));
 }
 
+// Extract release to given location and remove tar file
 try {
 	$phar = new PharData($archiveLocation);
 	$phar->extractTo($tempLocation, null, true);
@@ -89,6 +71,7 @@ try {
 	die("Error extracting archive: " . print_r($e, true));
 }
 
+// Set permissions such that php can execute the program correctly
 try {
 	$dirs = scandir($tempLocation);
 	removeDir($releaseFileLocation);
@@ -101,4 +84,7 @@ try {
 } catch (Exception $e) {
 	die("Error moving files or changing permissions: " . print_r($e, true));
 }
+
+// Updated to the latest version!
+echo "done";
 ?>

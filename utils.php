@@ -14,7 +14,7 @@ $default_options = array(
 
 // Check if options file exists
 if(!file_exists("../options.json")){
-	throw new Exception("options.json: file not found"), 1);
+	throw new Exception("options.json: file not found", 1);
 	die();
 }
 
@@ -29,6 +29,8 @@ try {
 
 // Remove directory and all its contents
 function removeDir($dir){
+	if(!file_exists($dir))
+		return false;
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 	foreach($files as $file) {
@@ -39,10 +41,13 @@ function removeDir($dir){
 	    }
 	}
 	rmdir($dir);
+	return true;
 }
 
 // Set permission of directory and all its contents
 function setDirectoryPermissions($dir, $file_perm, $dir_perm){
+	if(!file_exists($dir))
+		return false;
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 	foreach($files as $file) {

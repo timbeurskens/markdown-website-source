@@ -12,11 +12,15 @@ function removeDir($dir){
 	rmdir($dir);
 }
 
-function setPermissions($dir, $perm){
+function setPermissions($dir, $file_perm, $dir_perm){
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 	foreach($files as $file) {
-	    chmod($file->getRealPath(), $perm);
+		if ($file->isDir()){
+			chmod($file->getRealPath(), $dir_perm);
+		}else{
+			chmod($file->getRealPath(), $file_perm);
+		}
 	}
 	chmod($dir, $perm);
 }
@@ -66,7 +70,7 @@ if(isset($_POST['payload'])){
 						rename($tempLocation . $dir, $releaseFileLocation);
 					}
 				}
-				setPermissions($releaseFileLocation, 0644);
+				setPermissions($releaseFileLocation, 0644, 0755);
 			} catch(Exception $e){
 				print_r($e);
 			}

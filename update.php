@@ -1,4 +1,18 @@
 <?php
+function removeDir($dir){
+	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+	$files = new RecursiveIteratorIterator($it,
+	             RecursiveIteratorIterator::CHILD_FIRST);
+	foreach($files as $file) {
+	    if ($file->isDir()){
+	        rmdir($file->getRealPath());
+	    } else {
+	        unlink($file->getRealPath());
+	    }
+	}
+	rmdir($dir);
+}
+
 $tempLocation = '/home/factoryc/public_html/projects/markdown-website/_sys/temp/';
 $filename = $tempLocation . "release.tar.gz";
 $releaseFileLocation = "/home/factoryc/public_html/projects/markdown-website/_sys/latest";
@@ -38,6 +52,7 @@ if(isset($_POST['payload'])){
 				unset($phar);
 				Phar::unlinkArchive($filename);
 				$dirs = scandir($tempLocation);
+				removeDir($releaseFileLocation);
 				foreach($dirs as $dir){
 					if(preg_match($release_match, $dir) == 1){
 						rename($tempLocation . $dir, $releaseFileLocation);

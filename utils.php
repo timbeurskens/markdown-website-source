@@ -14,7 +14,7 @@ $default_options = array(
 
 // Check if options file exists
 if(!file_exists("../options.json")){
-	throw new Exception("options.json: file not found at " . realpath("../options.json"), 1);
+	throw new Exception("options.json: file not found"), 1);
 	die();
 }
 
@@ -67,8 +67,11 @@ abstract class BuildSystemStruct {
 		"file_parameters" => array()
 	);
 
-	public function __construct($data){
-		$this->sysParameters = array_merge($this->sysParameters, $data);
+	protected $htmlContent = "";
+
+	public function __construct($content, $opts){
+		$this->sysParameters = array_merge($this->sysParameters, $opts);
+		$this->htmlContent = $content;
 	}
 
 	abstract public function render();

@@ -1,8 +1,7 @@
 <?php
 function removeDir($dir){
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
-	$files = new RecursiveIteratorIterator($it,
-	             RecursiveIteratorIterator::CHILD_FIRST);
+	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 	foreach($files as $file) {
 	    if ($file->isDir()){
 	        rmdir($file->getRealPath());
@@ -11,6 +10,15 @@ function removeDir($dir){
 	    }
 	}
 	rmdir($dir);
+}
+
+function setPermissions($dir, $perm){
+	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+	foreach($files as $file) {
+	    chmod($file->getRealPath(), $perm);
+	}
+	chmod($dir, $perm);
 }
 
 $tempLocation = '/home/factoryc/public_html/projects/markdown-website/_sys/temp/';
@@ -58,11 +66,10 @@ if(isset($_POST['payload'])){
 						rename($tempLocation . $dir, $releaseFileLocation);
 					}
 				}
+				setPermissions($releaseFileLocation, 0644);
 			} catch(Exception $e){
 				print_r($e);
 			}
-
-
 		}else{
 			echo "No tarball url detected";
 		}

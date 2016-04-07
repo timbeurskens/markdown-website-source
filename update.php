@@ -40,7 +40,7 @@ $tarball_url = $release['tarball_url'];
 // Download release tarball
 try {
 	$dest_file = fopen($archiveLocation, 'wb');
-	$options = array(
+	$curl_options = array(
 		CURLOPT_FILE    => $dest_file,
 		CURLOPT_TIMEOUT => 28800, // set this to 8 hours so we dont timeout on big files
 		CURLOPT_URL     => $tarball_url,
@@ -49,7 +49,7 @@ try {
 	);
 
 	$ch = curl_init();
-	curl_setopt_array($ch, $options);
+	curl_setopt_array($ch, $curl_options);
 	curl_exec($ch);
 	curl_close($ch);
 	fclose($dest_file);

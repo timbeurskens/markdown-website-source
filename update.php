@@ -12,7 +12,7 @@ function removeDir($dir){
 	rmdir($dir);
 }
 
-function setPermissions($dir, $file_perm, $dir_perm){
+function setDirectoryPermissions($dir, $file_perm, $dir_perm){
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 	foreach($files as $file) {
@@ -22,7 +22,7 @@ function setPermissions($dir, $file_perm, $dir_perm){
 			chmod($file->getRealPath(), $file_perm);
 		}
 	}
-	chmod($dir, $perm);
+	chmod($dir, $dir_perm);
 }
 
 $tempLocation = '/home/factoryc/public_html/projects/markdown-website/_sys/temp/';
@@ -70,7 +70,7 @@ if(isset($_POST['payload'])){
 						rename($tempLocation . $dir, $releaseFileLocation);
 					}
 				}
-				setPermissions($releaseFileLocation, 0644, 0755);
+				setDirectoryPermissions($releaseFileLocation, 0644, 0755);
 			} catch(Exception $e){
 				print_r($e);
 			}

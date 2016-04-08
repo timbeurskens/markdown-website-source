@@ -125,19 +125,35 @@ require $options['parsedown_location'];
 // Init parsedown
 $Parsedown = new Parsedown();
 
+// Check if the file_list.json file exists
+if(file_exists($options['dest_location'] . "file_list.json")){
+	// Remove previously rendered files
+	$old_files_list = json_decode(file_get_contents($options['dest_location'] . "file_list.json"), true);
+	foreach($old_files_list as $file){
+		if(file_exists($options['dest_location'] . $file)){
+			unlink($options['dest_location'] . $file);
+		}
+	}
+}
+
+// Create list for storing rendered files
+$renderedFiles = array();
+
 // Go through all files and parse markdown files
 $iterator = new RecursiveDirectoryIterator($releaseFileLocation, RecursiveDirectoryIterator::SKIP_DOTS);
 $contentfiles = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
 foreach($contentfiles as $file) {
-  if ($file->isDir()){
+	// Get json settings file location
+	$fileOptions = $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename('.md') . ".json";
+	$newFilePath = str_replace($releaseFileLocation, $options['dest_location'], $file->getPath() . DIRECTORY_SEPARATOR);
+	$newFileRealPath = $newFilePath . $file->getBasename('.md') . ".html";
+	$relativePath = substr($file->getPath(), strlen($releaseFileLocation));
+
+	if ($file->isDir()){
     // Dir is empty since we first searched for children. We can remove this directory
     rmdir($file->getRealPath());
   } else {
-    if($file->getExtension() == "md"){
-      // Get json settings file location
-      $fileOptions = $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename('.md') . ".json";
-      $newFilePath = str_replace($releaseFileLocation, $options['dest_location'], $file->getPath() . DIRECTORY_SEPARATOR);
-      $newFileRealPath = $newFilePath . $file->getBasename('.md') . ".html";
+    if($file->getExtension() == "md" && !in_array($relativePath, $options['exclude'])){
       $fOptions = $options;
 
       // Merge file specific options
@@ -163,6 +179,8 @@ foreach($contentfiles as $file) {
       fwrite($newfileHandle, $newContent);
       fclose($newfileHandle);
 
+			$renderedFiles[] = $relativePath;
+
       unlink($file->getRealPath());
     }elseif($file->getExtension() == "json"){
       // File is deleted after rendering markdown file
@@ -172,6 +190,11 @@ foreach($contentfiles as $file) {
   }
 }
 rmdir($releaseFileLocation);
+
+$listHandle = fopen($options['dest_location'] . "file_list.json");
+$list_contents = json_encode($renderedFiles);
+fwrite($listHandle, $list_contents);
+fclose($listHandle);
 
 echo "Done!";
 ?>

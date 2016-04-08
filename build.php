@@ -197,10 +197,14 @@ foreach($contentfiles as $file) {
 }
 rmdir($releaseFileLocation);
 
+// Write file list to destination folder
 $listHandle = fopen($fileListLocation, "w");
 $list_contents = json_encode($renderedFiles);
 fwrite($listHandle, $list_contents);
 fclose($listHandle);
+
+// Post render
+$BuildSystemName::post_render($renderedFiles, $options);
 
 echo "Done!";
 ?>

@@ -216,7 +216,7 @@ if(count($oldFileList) > 0){
 	$sNewFileList = array_unique(array_map(removeFileName, $renderedFiles));
 	foreach ($sOldFileList as $oldPath) {
 		if(strlen($oldPath) > 0 && !array_match("/^" . preg_quote($oldPath, "/") . "/", $sNewFileList)){
-			removeDir($oldPath);
+			removeDir($options['dest_location'] .$oldPath);
 		}
 	}
 }

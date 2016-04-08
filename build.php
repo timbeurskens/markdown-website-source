@@ -176,7 +176,7 @@ foreach($contentfiles as $file) {
       $fHtmlContents = $Parsedown->text($fContents);
 
       // Create new build system
-      $buildsystemInstance = new $BuildSystemName($fHtmlContents, $fOptions, $file->getBasename(), $relativeRenderPath);
+      $buildsystemInstance = new $BuildSystemName($fHtmlContents, $fOptions, $file->getBasename('.md'), $relativeRenderPath);
 
       // Render data
       $newContent = $buildsystemInstance->render();

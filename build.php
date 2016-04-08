@@ -204,7 +204,8 @@ fwrite($listHandle, $list_contents);
 fclose($listHandle);
 
 // Post render
-$BuildSystemName::post_render($renderedFiles, $options);
+$buildsystemInstance = new $BuildSystemName(null, $options, null, $options['dest_location']);
+$buildsystemInstance->post_render($renderedFiles);
 
 echo "Done!";
 ?>

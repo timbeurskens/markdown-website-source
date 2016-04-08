@@ -4,7 +4,7 @@ class BuildSystem extends BuildSystemStruct{
     return $this->htmlContent;
   }
 
-  static function post_render($file_list, $options){
+  public function post_render($file_list){
     return;
   }
 }

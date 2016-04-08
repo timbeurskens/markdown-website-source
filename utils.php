@@ -86,6 +86,6 @@ abstract class BuildSystemStruct {
 	}
 
 	abstract public function render();
-	abstract static function post_render($file_list, $options);
+	abstract public function post_render($file_list);
 }
 ?>

@@ -130,7 +130,7 @@ if(file_exists($options['dest_location'] . "file_list.json")){
 	// Remove previously rendered files
 	$old_files_list = json_decode(file_get_contents($options['dest_location'] . "file_list.json"), true);
 	foreach($old_files_list as $file){
-		if(file_exists($options['dest_location'] . $file)){
+		if($file && file_exists($options['dest_location'] . $file)){
 			unlink($options['dest_location'] . $file);
 		}
 	}
@@ -147,7 +147,7 @@ foreach($contentfiles as $file) {
 	$fileOptions = $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename('.md') . ".json";
 	$newFilePath = str_replace($releaseFileLocation, $options['dest_location'], $file->getPath() . DIRECTORY_SEPARATOR);
 	$newFileRealPath = $newFilePath . $file->getBasename('.md') . ".html";
-	$relativePath = substr($file->getPath(), strlen($releaseFileLocation));
+	$relativePath = substr($file->getRealPath(), strlen($releaseFileLocation));
 
 	if ($file->isDir()){
     // Dir is empty since we first searched for children. We can remove this directory
@@ -191,7 +191,7 @@ foreach($contentfiles as $file) {
 }
 rmdir($releaseFileLocation);
 
-$listHandle = fopen($options['dest_location'] . "file_list.json");
+$listHandle = fopen($options['dest_location'] . "file_list.json", "w");
 $list_contents = json_encode($renderedFiles);
 fwrite($listHandle, $list_contents);
 fclose($listHandle);

@@ -24,7 +24,7 @@ if(!file_exists("../options.json")){
 $optionsRaw = file_get_contents("../options.json");
 $options = $default_options;
 try {
-	$options = array_merge($options, json_decode($optionsRaw, true));
+	$options = merge_settings($options, json_decode($optionsRaw, true));
 } catch (Exception $e) {
 	print($e);
 }
@@ -62,6 +62,18 @@ function setDirectoryPermissions($dir, $file_perm, $dir_perm){
 	chmod($dir, $dir_perm);
 }
 
+function merge_settings($old, $new){
+	foreach($new as $newkey => $newvalue){
+		if(isset($old[$newkey]) && is_array($old[$newkey]) && is_array($newvalue)){
+			//recursive
+			$old[$newkey] = merge_settings($old[$newkey], $newvalue);
+		}else{
+			$old[$newkey] = $newvalue;
+		}
+	}
+	return $old;
+}
+
 // Abstract Build System class.
 abstract class BuildSystemStruct {
 	protected $sysParameters = array(
@@ -79,7 +91,7 @@ abstract class BuildSystemStruct {
 	protected $location = "/";
 
 	public function __construct($content, $opts, $basename, $render_location){
-		$this->sysParameters = array_merge($this->sysParameters, $opts);
+		$this->sysParameters = merge_settings($this->sysParameters, $opts);
 		$this->htmlContent = $content;
 		$this->basename = $basename;
 		$this->location = $render_location;

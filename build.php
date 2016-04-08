@@ -110,7 +110,7 @@ if(file_exists($buildOptionsFile)){
 	// Read options file and merge with default options
 	$buildOptionsRaw = file_get_contents($buildOptionsFile);
 	try {
-		$options = array_merge($options, json_decode($buildOptionsRaw, true));
+		$options = merge_settings($options, json_decode($buildOptionsRaw, true));
 	} catch (Exception $e) {
 		print($e);
 	}
@@ -166,7 +166,7 @@ foreach($contentfiles as $file) {
       if(file_exists($fileOptions)){
         $fOptionsExtra = json_decode(file_get_contents($fileOptions), true);
         unlink($fileOptions);
-        $fOptions = array_merge($fOptions, $fOptionsExtra);
+        $fOptions = merge_settings($fOptions, $fOptionsExtra);
       }
 
       // Read markdown file contents

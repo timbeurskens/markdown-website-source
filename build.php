@@ -28,9 +28,9 @@ if(!isset($_SERVER['HTTP_X_HUB_SIGNATURE']) || $_SERVER['HTTP_X_HUB_SIGNATURE'] 
 	die();
 }
 
-// Check event: only release events are accepted
-if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || $_SERVER['HTTP_X_GITHUB_EVENT'] != "release"){
-	throw new Exception("This is not a release event!", 1);
+// Check event: only release and push events are accepted
+if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || ($_SERVER['HTTP_X_GITHUB_EVENT'] != "release" && $_SERVER['HTTP_X_GITHUB_EVENT'] != "push")){
+	throw new Exception("This is not a release or push event!", 1);
 	die();
 }
 
@@ -46,8 +46,9 @@ $payload = json_decode($_POST['payload'], true);
 
 $repo = $payload['repository'];
 $release_match = "/" . str_replace("/", "-", $repo['full_name']) . ".*/"; // match name-repo-version regex
-$release = $payload['release'];
-$tarball_url = $release['tarball_url'];
+$archive_format = "tarball";
+$git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : "master";
+$tarball_url = str_replace("{archive_format}", $archive_format, str_replace("{/ref}", $git_repo_ref, $repo['archive_url']));
 
 // Download release tarball
 try {

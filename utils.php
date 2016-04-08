@@ -9,7 +9,9 @@ $default_options = array(
 	"secret" => "",
 	"buildscript" => "/home/user/public_html/build/buildscript.php",
 	"parsedown_location" => "/home/user/public_html/parsedown/Parsedown.php",
-	"exclude" => array()
+	"exclude" => array(),
+	"allow_push_events" => true,
+	"push_event_branch" => "master"
 );
 
 // Check if options file exists

@@ -22,6 +22,12 @@ if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || ($_SERVER['HTTP_X_GITHUB_EVENT'] !
 	die();
 }
 
+// Check if push events are accepted
+if(!$options['allow_push_events'] && $_SERVER['HTTP_X_GITHUB_EVENT'] == "push"){
+	throw new Exception("Push events are not enabled in options.json file", 1);
+	die();
+}
+
 // Check decoded payload data
 if(!isset($_POST['payload'])){
 	throw new Exception("No url encoded payload available!", 1);
@@ -35,7 +41,7 @@ $payload = json_decode($_POST['payload'], true);
 $repo = $payload['repository'];
 $release_match = "/" . str_replace("/", "-", $repo['full_name']) . ".*/"; // match name-repo-version regex
 $archive_format = "tarball";
-$git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : "master";
+$git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : $options['push_event_branch'];
 $tarball_url = str_replace("{archive_format}", $archive_format, str_replace("{/ref}", $git_repo_ref, $repo['archive_url']));
 
 // Download release tarball

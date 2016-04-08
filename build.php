@@ -34,6 +34,12 @@ if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || ($_SERVER['HTTP_X_GITHUB_EVENT'] !
 	die();
 }
 
+// Check if push events are accepted
+if(!$options['allow_push_events'] && $_SERVER['HTTP_X_GITHUB_EVENT'] == "push"){
+	throw new Exception("Push events are not enabled in options.json file", 1);
+	die();
+}
+
 // Check decoded payload data
 if(!isset($_POST['payload'])){
 	throw new Exception("No url encoded payload available!", 1);

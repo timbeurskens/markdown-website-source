@@ -75,10 +75,14 @@ abstract class BuildSystemStruct {
 	);
 
 	protected $htmlContent = "";
+	protected $basename = "";
+	protected $location = "/";
 
-	public function __construct($content, $opts){
+	public function __construct($content, $opts, $basename, $render_location){
 		$this->sysParameters = array_merge($this->sysParameters, $opts);
 		$this->htmlContent = $content;
+		$this->basename = $basename;
+		$this->location = $render_location;
 	}
 
 	abstract public function render();

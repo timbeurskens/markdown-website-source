@@ -153,6 +153,7 @@ foreach($contentfiles as $file) {
 	$newFilePath = str_replace($releaseFileLocation, $options['dest_location'], $file->getPath() . DIRECTORY_SEPARATOR);
 	$newFileRealPath = $newFilePath . $file->getBasename('.md') . ".html";
 	$relativePath = substr($file->getRealPath(), strlen($releaseFileLocation));
+	$relativeRenderPath = substr($file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename('.md'), strlen($releaseFileLocation));
 
 	if ($file->isDir()){
     // Dir is empty since we first searched for children. We can remove this directory
@@ -175,7 +176,7 @@ foreach($contentfiles as $file) {
       $fHtmlContents = $Parsedown->text($fContents);
 
       // Create new build system
-      $buildsystemInstance = new $BuildSystemName($fHtmlContents, $fOptions);
+      $buildsystemInstance = new $BuildSystemName($fHtmlContents, $fOptions, $file->getBasename(), $relativeRenderPath);
 
       // Render data
       $newContent = $buildsystemInstance->render();
@@ -184,7 +185,7 @@ foreach($contentfiles as $file) {
       fwrite($newfileHandle, $newContent);
       fclose($newfileHandle);
 
-			$renderedFiles[] = $relativePath;
+			$renderedFiles[] = $relativeRenderPath;
 
       unlink($file->getRealPath());
     }elseif($file->getExtension() == "json"){

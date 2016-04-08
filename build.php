@@ -130,11 +130,13 @@ $Parsedown = new Parsedown();
 
 $fileListLocation = $options['dest_location'] . "file_list.json";
 
+$oldFileList = array();
+
 // Check if the file_list.json file exists
 if(file_exists($fileListLocation)){
 	// Remove previously rendered files
-	$old_files_list = json_decode(file_get_contents($fileListLocation), true);
-	foreach($old_files_list as $file){
+	$oldFileList = json_decode(file_get_contents($fileListLocation), true);
+	foreach($oldFileList as $file){
 		if($file && file_exists($options['dest_location'] . $file . ".html")){
 			unlink($options['dest_location'] . $file . ".html");
 		}
@@ -206,6 +208,18 @@ foreach($contentfiles as $file) {
   }
 }
 rmdir($releaseFileLocation);
+
+// Compare old list with new list and remove empty directories
+if(count($oldFileList) > 0){
+	// Remove basenames of both lists
+	$sOldFileList = array_unique(array_map(removeFileName, $oldFileList));
+	$sNewFileList = array_unique(array_map(removeFileName, $renderedFiles));
+	foreach ($sOldFileList as $oldPath) {
+		if(strlen($oldPath) > 0 && !array_match("/^" . preg_quote($oldPath, "/") . "/", $sNewFileList)){
+			removeDir($oldPath);
+		}
+	}
+}
 
 // Write file list to destination folder
 $listHandle = fopen($fileListLocation, "w");

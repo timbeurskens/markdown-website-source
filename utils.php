@@ -46,6 +46,19 @@ function removeDir($dir){
 	return true;
 }
 
+function removeFileName($path){
+	return substr($path, 0, strrpos($path, DIRECTORY_SEPARATOR));
+}
+
+function array_match($regex, $array){
+	foreach ($array as $element) {
+		if(is_string($element) && preg_match($regex, $element)){
+			return true;
+		}
+	}
+	return false;
+}
+
 // Set permission of directory and all its contents
 function setDirectoryPermissions($dir, $file_perm, $dir_perm){
 	if(!file_exists($dir))

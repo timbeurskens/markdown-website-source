@@ -153,7 +153,7 @@ foreach($contentfiles as $file) {
 	$newFilePath = str_replace($releaseFileLocation, $options['dest_location'], $file->getPath() . DIRECTORY_SEPARATOR);
 	$newFileRealPath = $newFilePath . $file->getBasename('.md') . ".html";
 	$relativePath = substr($file->getRealPath(), strlen($releaseFileLocation));
-	$relativeRenderPath = substr($file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename('.md'), strlen($releaseFileLocation));
+	$relativeRenderPath = substr($file->getPath(), strlen($releaseFileLocation));
 
 	if ($file->isDir()){
     // Dir is empty since we first searched for children. We can remove this directory
@@ -181,11 +181,19 @@ foreach($contentfiles as $file) {
       // Render data
       $newContent = $buildsystemInstance->render();
 
+			// Check if path exists
+			if(!file_exists($relativeRenderPath) || !is_dir($relativeRenderPath)){
+				if(!mkdir($relativeRenderPath, 0755, true)) {
+					throw new Exception("Error creating folders", 1);
+					die();
+				}
+			}
+
       $newfileHandle = fopen($newFileRealPath, "w");
       fwrite($newfileHandle, $newContent);
       fclose($newfileHandle);
 
-			$renderedFiles[] = $relativeRenderPath;
+			$renderedFiles[] = $relativeRenderPath . DIRECTORY_SEPARATOR . $file->getBasename();
 
       unlink($file->getRealPath());
     }elseif($file->getExtension() == "json"){

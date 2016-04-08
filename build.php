@@ -135,8 +135,8 @@ if(file_exists($fileListLocation)){
 	// Remove previously rendered files
 	$old_files_list = json_decode(file_get_contents($fileListLocation), true);
 	foreach($old_files_list as $file){
-		if($file && file_exists($options['dest_location'] . $file)){
-			unlink($options['dest_location'] . $file);
+		if($file && file_exists($options['dest_location'] . $file . ".html")){
+			unlink($options['dest_location'] . $file . ".html");
 		}
 	}
 }

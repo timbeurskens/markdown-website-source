@@ -53,7 +53,7 @@ $payload = json_decode($_POST['payload'], true);
 $repo = $payload['repository'];
 $release_match = "/" . str_replace("/", "-", $repo['full_name']) . ".*/"; // match name-repo-version regex
 $archive_format = "tarball";
-$git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : "master";
+$git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : $options['push_event_branch'];
 $tarball_url = str_replace("{archive_format}", $archive_format, str_replace("{/ref}", $git_repo_ref, $repo['archive_url']));
 
 // Download release tarball

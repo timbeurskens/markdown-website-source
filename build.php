@@ -17,7 +17,6 @@ $tempLocation = $options['temp_location'];
 $archiveLocation = $tempLocation . "content_release.tar.gz";
 $releaseFileLocation = $tempLocation . "content/";
 $buildOptionsFile = $releaseFileLocation . "build.json";
-$renderFileLocation = $options['dest_location'];
 
 // Create sha1 hash to validate payload
 $rawPayload = file_get_contents("php://input");
@@ -100,19 +99,16 @@ try {
 
 // Done updating content files
 // Read build options
-if(!file_exists($buildOptionsFile)){
-	throw new Exception("options.json: file not found at " . $buildOptionsFile, 1);
-	die();
+if(file_exists($buildOptionsFile)){
+	// Read options file and merge with default options
+	$buildOptionsRaw = file_get_contents($buildOptionsFile);
+	try {
+		$options = array_merge($options, json_decode($buildOptionsRaw, true));
+	} catch (Exception $e) {
+		print($e);
+	}
+	unlink($buildOptionsFile);
 }
-
-// Read options file and merge with default options
-$buildOptionsRaw = file_get_contents($buildOptionsFile);
-try {
-	$options = array_merge($options, json_decode($buildOptionsRaw, true));
-} catch (Exception $e) {
-	print($e);
-}
-unlink($buildOptionsFile);
 
 // Parsedown instance:
 if(!file_exists($options['parsedown_location'])){
@@ -125,10 +121,12 @@ require $options['parsedown_location'];
 // Init parsedown
 $Parsedown = new Parsedown();
 
+$fileListLocation = $options['dest_location'] . "file_list.json";
+
 // Check if the file_list.json file exists
-if(file_exists($options['dest_location'] . "file_list.json")){
+if(file_exists($fileListLocation)){
 	// Remove previously rendered files
-	$old_files_list = json_decode(file_get_contents($options['dest_location'] . "file_list.json"), true);
+	$old_files_list = json_decode(file_get_contents($fileListLocation), true);
 	foreach($old_files_list as $file){
 		if($file && file_exists($options['dest_location'] . $file)){
 			unlink($options['dest_location'] . $file);
@@ -191,7 +189,7 @@ foreach($contentfiles as $file) {
 }
 rmdir($releaseFileLocation);
 
-$listHandle = fopen($options['dest_location'] . "file_list.json", "w");
+$listHandle = fopen($fileListLocation, "w");
 $list_contents = json_encode($renderedFiles);
 fwrite($listHandle, $list_contents);
 fclose($listHandle);

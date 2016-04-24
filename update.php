@@ -12,26 +12,22 @@ $secretHash = "sha1=" . hash_hmac("sha1", $rawPayload, $options['secret']);
 
 // Validate payload and source of request
 if(!isset($_SERVER['HTTP_X_HUB_SIGNATURE']) || $_SERVER['HTTP_X_HUB_SIGNATURE'] != $secretHash){
-	throw new Exception("Not a valid signature!: ", 1);
-	die();
+	die("Not a valid signature");
 }
 
 // Check event: only release and push events are accepted
 if(!isset($_SERVER['HTTP_X_GITHUB_EVENT']) || ($_SERVER['HTTP_X_GITHUB_EVENT'] != "release" && $_SERVER['HTTP_X_GITHUB_EVENT'] != "push")){
-	throw new Exception("This is not a release or push event!", 1);
-	die();
+	die("This is not a release or push event!");
 }
 
 // Check if push events are accepted
 if(!$options['allow_push_events'] && $_SERVER['HTTP_X_GITHUB_EVENT'] == "push"){
-	throw new Exception("Push events are not enabled in options.json file", 1);
-	die();
+	die("Push events are not enabled in options.json file");
 }
 
 // Check decoded payload data
 if(!isset($_POST['payload'])){
-	throw new Exception("No url encoded payload available!", 1);
-	die();
+	die("No url encoded payload available!");
 }
 
 // Assuming the Github Webhook documentation is correct: we don't need to check if data exists.

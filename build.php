@@ -51,6 +51,10 @@ $archive_format = "tarball";
 $git_repo_ref = $_SERVER['HTTP_X_GITHUB_EVENT'] == "release" ? $payload['release']['tag_name'] : $options['push_event_branch'];
 $tarball_url = str_replace("{archive_format}", $archive_format, str_replace("{/ref}", $git_repo_ref, $repo['archive_url']));
 
+if($_SERVER['HTTP_X_GITHUB_EVENT'] == "push" && $payload['ref'] != "refs/heads/" . $options['push_event_branch']){
+	die("This is not a push to the master branch, no updates available.");
+}
+
 // Download release tarball
 try {
 	$dest_file = fopen($archiveLocation, 'wb');
